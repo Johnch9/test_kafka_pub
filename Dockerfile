@@ -2,12 +2,11 @@
 # Go Builder Image
 FROM golang:1.11.1-alpine AS builder
 
-RUN apk update && apk add curl git
+RUN apk update && apk add curl git && apk add --no-cache librdkafka
 
 RUN go get github.com/labstack/echo
 RUN go get github.com/labstack/echo/middleware
 RUN go get github.com/sirupsen/logrus
-RUN apk add librdkafka-dev build-base
 RUN go get github.com/confluentinc/confluent-kafka-go/kafka
 
 # set build arguments: GitHub user and repository
