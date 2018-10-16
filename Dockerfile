@@ -2,7 +2,21 @@
 # Go Builder Image
 FROM golang:1.11.1-alpine AS builder
 
-RUN apk update && apk add curl git && apk add pkgconfig && apk add --no-cache librdkafka
+#RUN apk update && apk add curl git && apk add pkgconfig && apk add --no-cache librdkafka
+
+RUN apk add --no-cache  --repository http://dl-3.alpinelinux.org/alpine/edge/community/ \
+      bash              \
+      gcc				\
+      git 				\
+      librdkafka-dev    \
+      libressl-dev      \
+      musl-dev          \
+      zlib-dev			\
+      wget 			&&  \
+      #
+      # Install dep
+      wget -nv -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 && \
+      chmod a+rx /usr/local/bin/dep
 
 RUN go get github.com/labstack/echo
 RUN go get github.com/labstack/echo/middleware
