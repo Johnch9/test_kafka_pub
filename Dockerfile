@@ -2,7 +2,7 @@
 # Go Builder Image
 FROM golang:1.11.1 AS builder
 
-RUN apk update && apk add curl git
+#RUN apk update && apk add curl git
 
 RUN go get github.com/labstack/echo
 RUN go get github.com/labstack/echo/middleware
