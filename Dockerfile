@@ -1,11 +1,8 @@
 # ---
 # Go Builder Image
-FROM golang:1.8-alpine AS builder
+FROM golang:1.11.1 AS builder
 
 RUN apk update && apk add curl git
-
-# Added to fix pkg-config
-RUN apt-get install -y pkg-config lxc-dev
 
 RUN go get github.com/labstack/echo
 RUN go get github.com/labstack/echo/middleware
@@ -31,7 +28,7 @@ RUN CGO_ENABLED=0 go build -v -o "dist/myapp"
 
 # ---
 # Application Runtime Image
-FROM alpine:3.6
+FROM alpine:latest
 
 # set build arguments: GitHub user and repository
 ARG GH_USER
