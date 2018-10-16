@@ -2,7 +2,7 @@
 # Go Builder Image
 FROM golang:1.11.1-alpine AS builder
 
-RUN apk update && apk add curl git && apk add --no-cache librdkafka
+RUN apk update && apk add curl git && apk add pkgconfig && apk add --no-cache librdkafka
 
 RUN go get github.com/labstack/echo
 RUN go get github.com/labstack/echo/middleware
