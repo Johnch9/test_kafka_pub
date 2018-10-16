@@ -4,6 +4,9 @@ FROM golang:1.8-alpine AS builder
 
 RUN apk update && apk add curl git
 
+# Added to fix pkg-config
+RUN apt-get install -y pkg-config lxc-dev
+
 RUN go get github.com/labstack/echo
 RUN go get github.com/labstack/echo/middleware
 RUN go get github.com/sirupsen/logrus
