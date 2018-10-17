@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/labstack/echo"
@@ -29,38 +30,40 @@ func main() {
 }
 
 func goWithDocker(c echo.Context) error {
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	broker := "kafka:9092"
+	topic := "test-topic"
+
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
+
 	if err != nil {
-		panic(err)
+		fmt.Printf("Failed to create producer: %s\n", err)
+		os.Exit(1)
 	}
 
-	defer p.Close()
+	fmt.Printf("Created Producer %v\n", p)
 
-	// Delivery report handler for produced messages
-	go func() {
-		for e := range p.Events() {
-			switch ev := e.(type) {
-			case *kafka.Message:
-				if ev.TopicPartition.Error != nil {
-					fmt.Printf("Delivery failed: %v\n", ev.TopicPartition)
-				} else {
-					fmt.Printf("Delivered message to %v\n", ev.TopicPartition)
-				}
-			}
-		}
-	}()
+	// Optional delivery channel, if not specified the Producer object's
+	// .Events channel is used.
+	deliveryChan := make(chan kafka.Event)
 
-	// Produce messages to topic (asynchronously)
-	topic := "myTopic"
-	for _, word := range []string{"Welcome", "to", "the", "Confluent", "Kafka", "Golang", "client"} {
-		p.Produce(&kafka.Message{
-			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-			Value:          []byte(word),
-		}, nil)
+	value := "Hello Go!"
+	err = p.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Value:          []byte(value),
+		Headers:        []kafka.Header{{Key: "myTestHeader", Value: []byte("header values are binary")}},
+	}, deliveryChan)
+
+	e := <-deliveryChan
+	m := e.(*kafka.Message)
+
+	if m.TopicPartition.Error != nil {
+		fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
+	} else {
+		fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
+			*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 	}
 
-	// Wait for message deliveries before shutting down
-	p.Flush(15 * 1000)
+	close(deliveryChan)
 
 	return c.JSON(http.StatusOK, "Go with Docker Container v2")
 }
