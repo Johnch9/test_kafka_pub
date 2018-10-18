@@ -30,6 +30,8 @@ func main() {
 }
 
 func goWithDocker(c echo.Context) error {
+	fmt.Println("Handler called :")
+
 	broker := "10.0.165.252:9092"
 	topic := "test-topic"
 
