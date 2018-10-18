@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  repository: r.cfcr.io/johnhoward/johnch9/testkafkapub
+  repository: r.cfcr.io/howardjohn9/johnch9/testkafkapub
   pullPolicy: IfNotPresent
 service:
   name: testkafkapub
